@@ -42,6 +42,7 @@ def run_blastn(folder, reference, query, names):
 
     return blast_output_name
 
+
 def get_blast_top_hit(blast_file):
     """
     Parse the blast file. Select the top hit
@@ -51,7 +52,8 @@ def get_blast_top_hit(blast_file):
 
     for blast_line in blast_results:
         best_hit = True
-        (queryId, subjectId, percIdentity, alnLength, mismatchCount, gapOpenCount, queryStart, queryEnd, subjectStart, subjectEnd, evalue, bitScore) = blast_line.split("\t")
+        (queryId, subjectId, percIdentity, alnLength, mismatchCount, gapOpenCount, queryStart,
+         queryEnd, subjectStart, subjectEnd, evalue, bitScore) = blast_line.split("\t")
 
         #get the top hit
         if queryId in blast_top_hit:
@@ -62,6 +64,7 @@ def get_blast_top_hit(blast_file):
             blast_top_hit[queryId] = blast_line.split("\t")
 
     return blast_top_hit
+
 
 def calculate_ani(blast_results, fragment_length):
     """
@@ -145,17 +148,16 @@ def create_distance_matrix(ani_dictionary):
     return rows, cols, ani_array
 
 
-def do_hier_clustering():
-    pass
-
-
 if __name__ == '__main__':
     import argparse
     import os
     import itertools
     from Bio import SeqIO
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     import scipy.cluster.hierarchy as sch
+    import scipy.spatial.distance
 
     program_description = "Script that takes a list of genomes, containing the location of the fasta files," \
                           "and generates a matrix with the ANI values for all the combinations"
@@ -289,11 +291,13 @@ if __name__ == '__main__':
     matrix_file = open(args.output_directory + "/matrix_file.txt", 'w')
     matrix_file.write("\t" + "\t".join(order_col_labels) + "\n")
 
-    for row_label, row in zip(order_col_labels,ani_array):
+    for row_label, row in zip(order_col_labels, ani_array):
         matrix_file.write(row_label + "\t" + "\t".join(str(n) for n in row) + "\n")
 
     #Run hierarchical analysis and save the plot
-    linkage_matrix = sch.linkage(ani_array, method="complete")
+
+    distance_matrix = scipy.spatial.distance.squareform(ani_array)
+    linkage_matrix = sch.linkage(distance_matrix, method="complete", metric="euclidean")  # Method and metric
     X = sch.dendrogram(linkage_matrix, labels=order_col_labels, orientation="left")
 
     plt.subplots_adjust(left=0.3)
