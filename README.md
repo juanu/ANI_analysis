@@ -25,8 +25,10 @@ The second required parameter is the name of the output folder where the results
 ####Output files:
 mapping_summary.txt, a summary of the analysis of each genome
 logfile.txt, the query genome, size and number of fragments. Useful to keep track of the status of the program
+
 matrix_file.txt, the identity matrix between all the compared genomes. It indicates the degree of dissimilarity between genomes:
 100%-ANI value.
+
 ANI_hier_plot.pdf, a hierarchical plot of the matrix file.
 
 
