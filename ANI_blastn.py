@@ -149,6 +149,8 @@ def create_distance_matrix(ani_dictionary):
 
 
 if __name__ == '__main__':
+    import sys
+    import shutil
     import argparse
     import os
     import itertools
@@ -181,7 +183,7 @@ if __name__ == '__main__':
         os.makedirs(temp_folder)
 
     #Read the genome list:
-    genome_info = {element[0]: element[1] for element in [line.split("\t") for line in [line.rstrip() for line in open(args.genome_input_list)]]}
+    genome_info = {element[0]: element[1] for element in [line.split("\t") for line in [line.rstrip() for line in open(args.genome_input_list)] if line.strip()]}
 
     #Create log file
     log_output = open(args.output_directory + "/logfile.txt", 'w')
@@ -202,7 +204,6 @@ if __name__ == '__main__':
     raw_ani_results = {}  # Results of the ANI analysis
 
     for genome_pair in genome_combinations:
-
         reference, query = genome_pair[0], genome_pair[1]
 
         reference_file = genome_info[reference]
@@ -211,9 +212,11 @@ if __name__ == '__main__':
         #Check that the files exists
         if not os.path.isfile(reference_file):
             print "The reference fasta for %s was not found" % reference
+            sys.exit("Check the path for the files")
 
         if not os.path.isfile(query_file):
             print "The query fasta for %s was not found" % query
+            sys.exit("Check the path for the files")
 
         #Create query file, with fragments of 500bp
 
@@ -253,6 +256,10 @@ if __name__ == '__main__':
         log_output.write("Number of fragments: %d \n" % genome_query_fragments)
 
         fragment_query_file = temp_folder + "/query.fna"
+
+        #Print information to screen
+        sys.stderr.write("Running blast of %s versus %s \n" % (reference, query))
+        sys.stderr.flush()
 
         #Run blast
         blast_file = run_blastn(temp_folder, reference_file, fragment_query_file, ("reference", "query"))
@@ -307,3 +314,6 @@ if __name__ == '__main__':
     log_output.close()
     mapping_summary.close()
     matrix_file.close()
+
+    #Remove the temporal folder
+    shutil.rmtree(temp_folder)
