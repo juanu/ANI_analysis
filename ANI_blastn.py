@@ -270,7 +270,10 @@ if __name__ == '__main__':
         sum_identity, number_hits, total_aligned_bases, total_unaligned_fragments, total_unaligned_bases = \
             calculate_ani(blast_top_hit, fragment_length_dict)
 
-        reference_query_ani = sum_identity / number_hits
+        try:
+            reference_query_ani = sum_identity / number_hits
+        except ZeroDivisionError:  # Cases were there are no hits
+            reference_query_ani = 0
 
         #Store the results
         raw_ani_results[(reference, query)] = reference_query_ani
