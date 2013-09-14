@@ -29,7 +29,8 @@ def run_blastn(folder, reference, query, names):
     if not os.path.isfile(reference):
         print "Reference file: %s not found" % reference
 
-    os.system('formatdb -i %s -p F -n %s/reference' % (reference, folder))
+    #os.system('formatdb -i %s -p F -n %s/reference' % (reference, folder))
+    os.system('makeblastdb -in %s -dbtype nucl -out %s/reference' % (reference, folder))
 
     num_processors = 4  # Number of processors to use for Blast
 
@@ -37,8 +38,12 @@ def run_blastn(folder, reference, query, names):
 
     blast_output_name = folder + "/" + query_name + "_" + reference_name
 
-    os.system('blastall -p blastn -a %d -d %s/reference -i %s -X 150 -q 1 -F F -m 8 -o %s' %
-              (num_processors, folder, query, blast_output_name))
+    #os.system('blastall -p blastn -a %d -d %s/reference -i %s -X 150 -q -1 -F F -m 8 -o %s' %
+    #          (num_processors, folder, query, blast_output_name))
+
+    os.system('blastn -num_threads %d -db %s/reference -query %s -xdrop_gap 150  -penalty -1 -dust no -outfmt 6 '
+              '-gapopen 5 -gapextend 2 -out %s' %
+    (num_processors, folder, query, blast_output_name))
 
     return blast_output_name
 
